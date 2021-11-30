@@ -59,7 +59,7 @@ timerinit()
   int id = r_mhartid();
 
   // ask the CLINT for a timer interrupt.
-  uint32 interval = 1000000; // cycles; about 1/10th second in qemu.
+  uint32 interval = 10000; // cycles; about 1/10th second in qemu.
   *(uint64*)CLINT_MTIMECMP(id) = *(uint64*)CLINT_MTIME + interval;
 
   // prepare information in scratch[] for timervec.
@@ -78,5 +78,5 @@ timerinit()
   w_mstatus(r_mstatus() | MSTATUS_MIE);
 
   // enable machine-mode timer interrupts.
-  w_mie(r_mie() | MIE_MTIE);
+  w_mie(r_mie() | MIE_MTIE | MIE_MEIE );
 }

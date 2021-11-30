@@ -34,6 +34,8 @@ consputc(int c)
   extern volatile int panicked; // from printf.c
 
   if(panicked){
+    uartputc('P');
+    uartputc('!');
     for(;;)
       ;
   }

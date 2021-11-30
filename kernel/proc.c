@@ -207,7 +207,7 @@ userinit(void)
   p->sz = PGSIZE;
 
   // prepare for the very first "return" from kernel to user.
-  p->tf->epc = 0;      // user program counter
+  p->tf->epc = 0x0;      // user program counter
   p->tf->sp = PGSIZE;  // user stack pointer
 
   safestrcpy(p->name, "initcode", sizeof(p->name));

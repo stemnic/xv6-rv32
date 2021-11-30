@@ -2,9 +2,12 @@
 static inline uint32
 r_mhartid()
 {
+  return 0;
+#if 0
   uint32 x;
   asm volatile("csrr %0, mhartid" : "=r" (x) );
   return x;
+#endif
 }
 
 // Machine Status Register, mstatus
@@ -256,12 +259,17 @@ r_time()
   return x;
 }
 
+void            printf(char*, ...);
+
 // enable device interrupts
 static inline void
 intr_on()
 {
+//	printf("IO1\n");
   w_sie(r_sie() | SIE_SEIE | SIE_STIE | SIE_SSIE);
+//	printf("IO2\n");
   w_sstatus(r_sstatus() | SSTATUS_SIE);
+//	printf("IO3\n");
 }
 
 // disable device interrupts

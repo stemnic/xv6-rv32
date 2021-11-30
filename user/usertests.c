@@ -607,6 +607,7 @@ void
 reparent2(char *s)
 {
   for(int i = 0; i < 800; i++){
+      printf("i = %d\n", i);
     int pid1 = fork();
     if(pid1 < 0){
       printf("fork failed\n");

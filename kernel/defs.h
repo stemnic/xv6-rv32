@@ -56,7 +56,7 @@ int             writei(struct inode*, int, uint32, uint, uint);
 // ramdisk.c
 void            ramdiskinit(void);
 void            ramdiskintr(void);
-void            ramdiskrw(struct buf*);
+void            ramdiskrw(struct buf*, int write);
 
 // kalloc.c
 void*           kalloc(void);

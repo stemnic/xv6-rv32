@@ -104,7 +104,7 @@ fprintf(int fd, const char *fmt, ...)
 }
 
 void
-printf(const char *fmt, ...)
+printf(char *fmt, ...)
 {
   va_list ap;
 

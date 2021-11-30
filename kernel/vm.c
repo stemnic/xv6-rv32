@@ -33,7 +33,7 @@ kvminit()
   kvmmap(UART0, UART0, PGSIZE, PTE_R | PTE_W);
 
   // virtio mmio disk interface
-  kvmmap(VIRTIO0, VIRTIO0, PGSIZE, PTE_R | PTE_W);
+//  kvmmap(VIRTIO0, VIRTIO0, PGSIZE, PTE_R | PTE_W);
 
   // CLINT
   kvmmap(CLINT, CLINT, 0x10000, PTE_R | PTE_W);
@@ -58,7 +58,7 @@ void
 kvminithart()
 {
   w_satp(MAKE_SATP(kernel_pagetable));
-  sfence_vma();
+//  sfence_vma();
 }
 
 // Return the address of the PTE in page table pagetable
@@ -201,8 +201,10 @@ uvmunmap(pagetable_t pagetable, uint32 va, uint32 size, int do_free)
   a = PGROUNDDOWN(va);
   last = PGROUNDDOWN(va + size - 1);
   for(;;){
-    if((pte = walk(pagetable, a, 0)) == 0)
-      panic("uvmunmap: walk");
+    if((pte = walk(pagetable, a, 0)) == 0) {
+      printf("addr %p\n", a);
+      panic("uvmunmap: walk"); 
+    }
     if((*pte & PTE_V) == 0){
       printf("va=%p pte=%p\n", a, *pte);
       panic("uvmunmap: not mapped");

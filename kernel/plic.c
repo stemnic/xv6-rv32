@@ -12,20 +12,19 @@ void
 plicinit(void)
 {
   // set desired IRQ priorities non-zero (otherwise disabled).
-  *(uint32*)(PLIC + UART0_IRQ*4) = 1;
-  *(uint32*)(PLIC + VIRTIO0_IRQ*4) = 1;
+  *(volatile uint32*)(PLIC + UART0_IRQ*4) = 7;
 }
 
 void
 plicinithart(void)
 {
-  int hart = cpuid();
+  int hart = 0; // cpuid();
   
   // set uart's enable bit for this hart's S-mode. 
-  *(uint32*)PLIC_SENABLE(hart)= (1 << UART0_IRQ) | (1 << VIRTIO0_IRQ);
+  *(uint32*)PLIC_MENABLE(hart) = (1 << UART0_IRQ); // | (1 << VIRTIO0_IRQ);
 
   // set this hart's S-mode priority threshold to 0.
-  *(uint32*)PLIC_SPRIORITY(hart) = 0;
+  *(uint32*)PLIC_MPRIORITY(hart) = 0;
 }
 
 // return a bitmap of which IRQs are waiting
@@ -48,7 +47,7 @@ plic_claim(void)
 {
   int hart = cpuid();
   // int irq = *(uint32*)(PLIC + 0x201004);
-  int irq = *(uint32*)PLIC_SCLAIM(hart);
+  int irq = *(uint32*)PLIC_MCLAIM(hart);
   return irq;
 }
 
@@ -58,5 +57,5 @@ plic_complete(int irq)
 {
   int hart = cpuid();
   //*(uint32*)(PLIC + 0x201004) = irq;
-  *(uint32*)PLIC_SCLAIM(hart) = irq;
+  *(uint32*)PLIC_MCLAIM(hart) = irq;
 }

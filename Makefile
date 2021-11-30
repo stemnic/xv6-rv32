@@ -28,11 +28,13 @@ OBJS = \
   $K/sysfile.o \
   $K/kernelvec.o \
   $K/plic.o \
-  $K/virtio_disk.o
+  $K/ramdisk.o
+#  $K/virtio_disk.o
 
 # riscv32-unknown-elf- or riscv32-linux-gnu-
 # perhaps in /opt/riscv/bin
 TOOLPREFIX = riscv32-unknown-elf-
+# TOOLPREFIX = riscv32-unknown-linux-gnu-
 
 # Try to infer the correct TOOLPREFIX if not set
 ifndef TOOLPREFIX
@@ -46,7 +48,7 @@ TOOLPREFIX := $(shell if riscv32-unknown-elf-objdump -i 2>&1 | grep 'elf64-big' 
 	echo "***" 1>&2; exit 1; fi)
 endif
 
-QEMU = qemu-system-riscv32 -monitor telnet:127.0.0.1:55555,server,nowait 
+QEMU = qemu-system-riscv32 -monitor telnet:127.0.0.1:56555,server,nowait 
 
 CC = $(TOOLPREFIX)gcc
 AS = $(TOOLPREFIX)gas
@@ -132,6 +134,7 @@ UPROGS=\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
+	xxd -i fs.img > kernel/ramdisk.h
 
 -include kernel/*.d user/*.d
 
@@ -150,7 +153,7 @@ QEMUGDB = $(shell if $(QEMU) -help | grep -q '^-gdb'; \
 	then echo "-gdb tcp::$(GDBPORT)"; \
 	else echo "-s -p $(GDBPORT)"; fi)
 ifndef CPUS
-CPUS := 3
+CPUS := 1
 endif
 
 QEMUEXTRA = -drive file=fs1.img,if=none,format=raw,id=x1 -device virtio-blk-device,drive=x1,bus=virtio-mmio-bus.1

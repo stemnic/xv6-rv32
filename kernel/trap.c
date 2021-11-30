@@ -133,11 +133,13 @@ usertrapret(void)
 void 
 kerneltrap()
 {
+//  printf("K");
   int which_dev = 0;
   uint32 sepc = r_sepc();
   uint32 sstatus = r_sstatus();
   uint32 scause = r_scause();
   
+  // printf("K epc=%p sstatus=%p scause=%p", sepc, sstatus, scause);
 
   if((sstatus & SSTATUS_SPP) == 0)
     panic("kerneltrap: not from supervisor mode");
@@ -178,9 +180,10 @@ int
 devintr()
 {
   uint32 scause = r_scause();
+  // printf("d scause %p\n", scause);
 
   if((scause & 0x80000000L) &&
-     (scause & 0xff) == 9){
+     (scause & 0xff) == 0xb){
     // this is a supervisor external interrupt, via PLIC.
 
     // irq indicates which device interrupted.
@@ -188,16 +191,20 @@ devintr()
 
     if(irq == UART0_IRQ){
       uartintr();
-    } else if(irq == VIRTIO0_IRQ){
-      virtio_disk_intr();
+//    } else if(irq == VIRTIO0_IRQ){
+//      virtio_disk_intr();
     } else {
     }
 
     plic_complete(irq);
     return 1;
   } else if(scause == 0x80000001L){
+    printf("1");
     // software interrupt from a machine-mode timer interrupt,
     // forwarded by timervec in kernelvec.S.
+    uint64 t = *(uint64*)CLINT_MTIME + 10000;
+    *(uint32*)CLINT_MTIMECMP(0) = t & 0xffffffff;
+    *(uint32*)(CLINT_MTIMECMP(0)+4) = t >> 32; // ???
 
     if(cpuid() == 0){
       clockintr();
@@ -207,6 +214,16 @@ devintr()
     // the SSIP bit in sip.
     w_sip(r_sip() & ~2);
 
+    return 2;
+  } else if(scause == 0x80000007L){
+//    printf("C");
+
+    uint64 t = *(uint64*)CLINT_MTIME + 100000;
+    *(uint32*)CLINT_MTIMECMP(0) = t & 0xffffffff;
+    *(uint32*)(CLINT_MTIMECMP(0)+4) = t >> 32; // ???
+
+    clockintr();
+    w_sip(r_sip() & ~2);
     return 2;
   } else {
     return 0;
